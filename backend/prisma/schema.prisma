@@ -13,3 +13,44 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Membership {
+  id    Int    @id @default(autoincrement())
+  type  String
+  price Float
+  users User[]
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String
+  membershipId Int
+  membership   Membership @relation(fields: [membershipId], references: [id])
+  bookings     Booking[]
+}
+
+model Trainer {
+  id        Int     @id @default(autoincrement())
+  name      String
+  specialty String
+  classes   Class[]
+}
+
+model Class {
+  id        Int       @id @default(autoincrement())
+  name      String
+  trainerId Int
+  schedule  DateTime
+  trainer   Trainer   @relation(fields: [trainerId], references: [id])
+  bookings  Booking[]
+}
+
+model Booking {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  classId Int
+  date    DateTime
+  user    User     @relation(fields: [userId], references: [id])
+  class   Class    @relation(fields: [classId], references: [id])
+}
