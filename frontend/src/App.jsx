@@ -31,7 +31,11 @@ function App() {
     <div style={{ padding: "2rem" }}>
       <h1>🏋️ Gym Dashboard</h1>
       <AddUserForm onSuccess={fetchUsers} />
-      {loading ? <p>Loading users...</p> : <UserList users={users} />}
+      {loading ? (
+        <p>Loading users...</p>
+      ) : (
+        <UserList users={users} onUpdate={fetchUsers} />
+      )}
     </div>
   );
 }
