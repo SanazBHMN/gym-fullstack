@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const { PrismaClient } = require("../generated/prisma");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 dotenv.config();
 
@@ -32,7 +32,6 @@ app.get("/", (req, res) => {
 });
 
 app.get("/mongo-test", async (req, res) => {
-  console.log("/mongo-test route hit");
   try {
     const users = await mongoDb.collection("users").find().toArray();
     res.json(users);
@@ -87,6 +86,47 @@ app.post("/api/users", async (req, res) => {
     res
       .status(500)
       .json({ error: "FAILED TO INSERT USER", details: error.message });
+  }
+});
+
+app.delete("/api/users/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    let mongoDeleted = 0;
+    let pgDeleted = 0;
+
+    // Try deleting from MongoDB
+    try {
+      if (ObjectId.isValid(id)) {
+        const result = await mongoDb.collection("users").deleteOne({
+          _id: new ObjectId(id),
+        });
+        mongoDeleted = result.deletedCount;
+      }
+    } catch (mongoErr) {
+      console.warn("Mongo delete failed:", mongoErr.message);
+    }
+
+    // Try deleting from PostgreSQL
+    try {
+      const result = await prisma.user.deleteMany({
+        where: { id: Number(id) || 0 },
+      });
+      pgDeleted = result.count;
+    } catch (pgErr) {
+      console.warn("Postgres delete failed:", pgErr.message);
+    }
+
+    // Decide final response
+    if (mongoDeleted > 0 || pgDeleted > 0) {
+      return res.json({ message: "User deleted successfully" });
+    } else {
+      return res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: "Failed to delete user" });
   }
 });
 
