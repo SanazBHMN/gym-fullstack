@@ -1,11 +1,13 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const { PrismaClient } = require("../generated/prisma");
 const { MongoClient, ObjectId } = require("mongodb");
 
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // MongoDB setup
