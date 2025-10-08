@@ -42,5 +42,26 @@ app.get("/mongo-test", async (req, res) => {
   }
 });
 
+app.get("/api/users", async (req, res) => {
+  try {
+    // fetch users form postgresql
+    const sqlUsers = await prisma.user.findMany();
+
+    // fetch users from mongodb
+    const mongoUsers = await mongoDb.collection("users").find().toArray();
+
+    // combine results
+    const allUsers = [
+      ...sqlUsers.map((user) => ({ ...user, source: "PostgreSQL" })),
+      ...mongoUsers.map((user) => ({ ...user, sourc: "MongoDB" })),
+    ];
+
+    res.json(allUsers);
+  } catch (error) {
+    console.log("ERROR FETCHING USERS", error);
+    res.status(500).json({ error: "FAILED TO FETCH USERS FROM BOTH DBs" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`SERVER IS RUNNING ON PORT ${PORT}`));
