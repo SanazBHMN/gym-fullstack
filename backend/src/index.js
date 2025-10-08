@@ -48,18 +48,45 @@ app.get("/api/users", async (req, res) => {
     const sqlUsers = await prisma.user.findMany();
 
     // fetch users from mongodb
-    const mongoUsers = await mongoDb.collection("users").find().toArray();
+    const mongoUsers = await mongoDb
+      .collection("users")
+      .find()
+      .project({ name: 1, email: 1, feedback: 1 })
+      .toArray();
 
     // combine results
-    const allUsers = [
-      ...sqlUsers.map((user) => ({ ...user, source: "PostgreSQL" })),
-      ...mongoUsers.map((user) => ({ ...user, sourc: "MongoDB" })),
-    ];
+    const allUsers = [...sqlUsers, ...mongoUsers];
 
     res.json(allUsers);
   } catch (error) {
     console.log("ERROR FETCHING USERS", error);
     res.status(500).json({ error: "FAILED TO FETCH USERS FROM BOTH DBs" });
+  }
+});
+
+app.post("/api/users", async (req, res) => {
+  const { name, email, feedback } = req.body;
+
+  try {
+    let newUser;
+
+    if (feedback) {
+      // insert into mongodb
+      const result = await mongoDb
+        .collection("users")
+        .insertOne({ name, email, feedback });
+      newUser = { _id: result.insertedId, name, email, feedback };
+    } else {
+      // insert into postgres
+      newUser = await prisma.user.create({ data: { name, email } });
+    }
+
+    res.json(newUser);
+  } catch (error) {
+    console.log("ERROR INSERTING USER", error);
+    res
+      .status(500)
+      .json({ error: "FAILED TO INSERT USER", details: error.message });
   }
 });
 
