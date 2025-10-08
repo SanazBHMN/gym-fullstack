@@ -28,14 +28,16 @@ function App() {
   if (loading) return <p>LOADING USERS...</p>;
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>🏋️ Gym Dashboard</h1>
-      <AddUserForm onSuccess={fetchUsers} />
-      {loading ? (
-        <p>Loading users...</p>
-      ) : (
-        <UserList users={users} onUpdate={fetchUsers} />
-      )}
+    <div className="w-full">
+      <div className="w-11/12 mx-auto">
+        <h1>🏋️ Gym Dashboard</h1>
+        <AddUserForm onSuccess={fetchUsers} />
+        {loading ? (
+          <p>Loading users...</p>
+        ) : (
+          <UserList users={users} onUpdate={fetchUsers} />
+        )}
+      </div>
     </div>
   );
 }

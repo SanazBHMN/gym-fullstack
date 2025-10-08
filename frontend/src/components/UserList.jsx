@@ -37,7 +37,7 @@ export const UserList = ({ users, onUpdate }) => {
   };
 
   return (
-    <ul>
+    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
       {users.length === 0 ? (
         <p>No users found.</p>
       ) : (
@@ -72,11 +72,27 @@ export const UserList = ({ users, onUpdate }) => {
                 <button onClick={cancelEdit}>Cancel</button>
               </>
             ) : (
-              <>
-                {user.name} — {user.email}
-                {user.feedback && ` — Feedback: ${user.feedback}`}
-                <button onClick={() => startEdit(user)}>Edit</button>
-              </>
+              <div className="card w-11/12 bg-base-100 card-sm shadow-sm">
+                <figure>
+                  <img
+                    src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+                    alt="Shoes"
+                  />
+                </figure>
+                <div className="card-body">
+                  <h2 className="card-title">{user.name}</h2>
+                  <p>{user.feedback && `${user.feedback}`}</p>
+                </div>
+                <div className="justify-between card-actions">
+                  <button className="btn btn-error text-white">Delete</button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => startEdit(user)}
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
             )}
           </li>
         ))
