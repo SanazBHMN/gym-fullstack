@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { UserList } from "./components/UserList";
+import { AddUserForm } from "./components/AddUserForm";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   const fetchUsers = () => {
     setLoading(true);
@@ -26,11 +26,11 @@ function App() {
   }, []);
 
   if (loading) return <p>LOADING USERS...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1>🏋️ Gym Dashboard</h1>
+      <AddUserForm onSuccess={fetchUsers} />
       {loading ? <p>Loading users...</p> : <UserList users={users} />}
     </div>
   );
