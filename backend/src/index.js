@@ -130,5 +130,48 @@ app.delete("/api/users/:id", async (req, res) => {
   }
 });
 
+app.put("/api/users/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, email, feedback } = req.body;
+
+  try {
+    let mongoUpdated = 0;
+    let pgUpdated = 0;
+
+    try {
+      const result = await prisma.user.updateMany({
+        where: { id: Number(id) || 0 },
+        data: { name, email },
+      });
+      pgUpdated = result.count;
+    } catch (error) {
+      console.warn("POSTGRES UPDATE FAILED", error.message);
+    }
+
+    try {
+      if (ObjectId.isValid(id)) {
+        const result = await mongoDb.collection("users").updateOne(
+          {
+            _id: new ObjectId(id),
+          },
+          { $set: { name, email, feedback } }
+        );
+        mongoUpdated = result.modifiedCount;
+      }
+    } catch (error) {
+      console.warn("MONGO UPDATE FAILED", error.message);
+    }
+
+    if (pgUpdated > 0 || mongoUpdated > 0) {
+      return res.json({ message: "USER UPDATED SUCCESSFULLY" });
+    } else {
+      return res.status(404).json({ error: "USER NOT FOUND" });
+    }
+  } catch (error) {
+    console.error("ERROR UPDATING USER", error);
+    res.status(500).json({ error: "FAILED TO UPDATE USER" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`SERVER IS RUNNING ON PORT ${PORT}`));
