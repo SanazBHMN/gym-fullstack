@@ -65,6 +65,26 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
+app.get("/api/mongo-users", async (req, res) => {
+  try {
+    const users = await mongoDb.collection("users").find().toArray();
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "FAILED TO FETCH USERS FROM MONGODB" });
+  }
+});
+
+app.get("/api/postgres-users", async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "FAILED TO FETCH USERS FROM POSTGRES" });
+  }
+});
+
 app.post("/api/users", async (req, res) => {
   const { name, email, feedback } = req.body;
 
