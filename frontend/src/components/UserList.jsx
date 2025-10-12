@@ -46,6 +46,7 @@ export const UserList = ({ users, onUpdate }) => {
             {editingId === (user.id || user._id) ? (
               <>
                 <input
+                  className="input input-neutral"
                   type="text"
                   value={editForm.name}
                   onChange={(e) =>
@@ -53,6 +54,7 @@ export const UserList = ({ users, onUpdate }) => {
                   }
                 />
                 <input
+                  className="input input-neutral"
                   type="email"
                   value={editForm.email}
                   onChange={(e) =>
@@ -60,6 +62,7 @@ export const UserList = ({ users, onUpdate }) => {
                   }
                 />
                 <input
+                  className="input input-neutral"
                   type="text"
                   value={editForm.feedback}
                   onChange={(e) =>

@@ -24,6 +24,7 @@ export const AddUserForm = ({ onSuccess }) => {
   return (
     <form onSubmit={handleSubmit}>
       <input
+        className="input input-neutral"
         type="text"
         placeholder="Name"
         value={form.name}
@@ -31,6 +32,7 @@ export const AddUserForm = ({ onSuccess }) => {
         required
       />
       <input
+        className="input input-neutral"
         type="email"
         placeholder="Email"
         value={form.email}
@@ -38,6 +40,7 @@ export const AddUserForm = ({ onSuccess }) => {
         required
       />
       <input
+        className="input input-neutral"
         type="text"
         placeholder="Feedback"
         value={form.feedback}
