@@ -23,30 +23,33 @@ export const AddUserForm = ({ onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        className="input input-neutral"
-        type="text"
-        placeholder="Name"
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        required
-      />
-      <input
-        className="input input-neutral"
-        type="email"
-        placeholder="Email"
-        value={form.email}
-        onChange={(e) => setForm({ ...form, email: e.target.value })}
-        required
-      />
-      <input
-        className="input input-neutral"
-        type="text"
-        placeholder="Feedback"
-        value={form.feedback}
-        onChange={(e) => setForm({ ...form, feedback: e.target.value })}
-      />
-      <button type="submit">Add user</button>
+      <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+        <legend className="fieldset-legend">Login</legend>
+        <input
+          className="input input-neutral"
+          type="text"
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          required
+        />
+        <input
+          className="input input-neutral"
+          type="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          required
+        />
+        <input
+          className="input input-neutral"
+          type="text"
+          placeholder="Feedback"
+          value={form.feedback}
+          onChange={(e) => setForm({ ...form, feedback: e.target.value })}
+        />
+        <button type="submit">Add user</button>
+      </fieldset>
     </form>
   );
 };

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import "./App.css";
 import { UserList } from "./components/UserList";
 import { AddUserForm } from "./components/AddUserForm";
 import { Dropdown } from "./components/Dropdown";
+import "./App.css";
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -55,21 +55,22 @@ function App() {
 
   return (
     <div className="w-full">
-      <div className="w-11/12 mx-auto">
-        <h1>🏋️ Gym Dashboard</h1>
-        <Dropdown
-          onAllClick={fetchUsers}
-          onPgClick={fetchPostgresUsers}
-          onMongoClick={fetchMongoUsers}
-          onJoinedClick={fetchJoinedUsers}
-        />
-        {/* <AddUserForm onSuccess={fetchUsers} /> */}
+      <main className="w-11/12 md:w-9/12 mx-auto my-15">
+        <div className="flex justify-between mb-3">
+          <Dropdown
+            onAllClick={fetchUsers}
+            onPgClick={fetchPostgresUsers}
+            onMongoClick={fetchMongoUsers}
+            onJoinedClick={fetchJoinedUsers}
+          />
+          <AddUserForm onSuccess={fetchUsers} />
+        </div>
         {loading ? (
           <p>Loading users...</p>
         ) : (
           <UserList users={users} onUpdate={fetchUsers} />
         )}
-      </div>
+      </main>
     </div>
   );
 }
