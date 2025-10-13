@@ -85,6 +85,32 @@ app.get("/api/postgres-users", async (req, res) => {
   }
 });
 
+app.get("/api/joined-users", async (req, res) => {
+  try {
+    const pgUsers = await prisma.user.findMany({
+      include: { membership: true },
+    });
+    const feedbackDocs = await mongoDb.collection("feedback").find().toArray();
+
+    const joinedUsers = pgUsers.map((pgUser) => {
+      const feedback = feedbackDocs.find((fb) => fb.userEmail === pgUser.email);
+
+      return {
+        name: pgUser.name,
+        email: pgUser.email,
+        membership: pgUser.membership?.type || "None",
+        feedback: feedback?.message || "No feedback",
+        rating: feedback?.rating || null,
+      };
+    });
+
+    res.json(joinedUsers);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "JOIN FAILED" });
+  }
+});
+
 app.post("/api/users", async (req, res) => {
   const { name, email, feedback } = req.body;
 
