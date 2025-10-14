@@ -2,11 +2,21 @@ import { useState } from "react";
 
 export const UserList = ({ users, onUpdate }) => {
   const [editingId, setEditingId] = useState(null);
+  const [checkedUsers, setCheckedUsers] = useState([]); // track checked users by id
   const [editForm, setEditForm] = useState({
     name: "",
     email: "",
     feedback: "",
   });
+
+  // toggle checkbox per user
+  const handleChecked = (userId) => {
+    setCheckedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
 
   const startEdit = (user) => {
     setEditingId(user.id || user._id);
@@ -29,87 +39,135 @@ export const UserList = ({ users, onUpdate }) => {
 
       if (!res.ok) throw new Error("FAILED TO UPDATE USER");
       setEditingId(null);
-      onUpdate(); //refresh list
+      onUpdate();
     } catch (error) {
       console.error(error);
       alert("ERROR UPDATING USER");
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("FAILED TO DELETE USER");
+      onUpdate();
+    } catch (error) {
+      console.error(error);
+      alert("ERROR DELETING USER");
+    }
+  };
+
   return (
-    <ul className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      {users.length === 0 ? (
-        <p>No users found.</p>
-      ) : (
-        users.map((user) => (
-          <li key={user.id || user._id} className="w-full mx-auto">
-            {editingId === (user.id || user._id) ? (
-              <div className="border h-full p-3 rounded-md">
-                <input
-                  className="input input-neutral mb-4 w-full"
-                  type="text"
-                  value={editForm.name}
-                  placeholder="Name"
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, name: e.target.value })
-                  }
-                />
-                <input
-                  className="input input-neutral mb-4 w-full"
-                  type="email"
-                  value={editForm.email}
-                  placeholder="Email"
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, email: e.target.value })
-                  }
-                />
-                <input
-                  className="input input-neutral mb-4 w-full"
-                  type="text"
-                  value={editForm.feedback}
-                  placeholder="Feedback"
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, feedback: e.target.value })
-                  }
-                />
-                <div className="flex justify-between">
-                  <button className="btn" onClick={cancelEdit}>
-                    Cancel
-                  </button>
-                  <button
-                    className="btn"
-                    onClick={() => handleSave(user.id || user._id)}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="card w-full bg-base-100 card-sm shadow-sm">
-                <figure>
-                  <img
-                    src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-                    alt="Shoes"
-                  />
-                </figure>
-                <div className="card-body">
-                  <h2 className="card-title">{user.name}</h2>
-                  <p>{user.feedback && `${user.feedback}`}</p>
-                </div>
-                <div className="justify-between card-actions m-3">
-                  <button className="btn btn-error text-white">Delete</button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => startEdit(user)}
-                  >
-                    Edit
-                  </button>
-                </div>
-              </div>
-            )}
-          </li>
-        ))
-      )}
-    </ul>
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Name / Email</th>
+            <th>Trainer</th>
+            <th>Membership</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="text-center">
+                No users found
+              </td>
+            </tr>
+          ) : (
+            users.map((user) => {
+              const userId = user.id || user._id;
+              const isEditing = editingId === userId;
+              const isChecked = checkedUsers.includes(userId);
+
+              return (
+                <tr key={userId}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      className="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleChecked(userId)}
+                    />
+                  </td>
+
+                  <td>
+                    {isEditing ? (
+                      <div className="flex flex-col gap-1">
+                        <input
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, name: e.target.value })
+                          }
+                          className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-400"
+                        />
+                        <input
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, email: e.target.value })
+                          }
+                          className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-400"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="font-bold">{user.name}</div>
+                        <div className="text-sm opacity-50">{user.email}</div>
+                      </div>
+                    )}
+                  </td>
+
+                  <td>Shaghayegh</td>
+                  <td>{user.membership}</td>
+
+                  <td>
+                    {isEditing ? (
+                      <>
+                        <button
+                          className="btn btn-xs btn-success"
+                          onClick={() => handleSave(userId)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="btn btn-xs btn-ghost"
+                          onClick={cancelEdit}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="btn btn-xs btn-outline"
+                          onClick={() => startEdit(user)}
+                        >
+                          Edit
+                        </button>
+                        {isChecked && (
+                          <button
+                            className="btn btn-xs btn-error"
+                            onClick={() => handleDelete(userId)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 };
