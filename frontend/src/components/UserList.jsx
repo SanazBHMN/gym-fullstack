@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export const UserList = ({ users, onUpdate }) => {
   const [editingId, setEditingId] = useState(null);
-  const [checkedUsers, setCheckedUsers] = useState([]); // track checked users by id
+  const [checkedUsers, setCheckedUsers] = useState([]);
   const [editForm, setEditForm] = useState({
     name: "",
     email: "",
@@ -60,130 +60,121 @@ export const UserList = ({ users, onUpdate }) => {
     }
   };
 
+  if (users.length === 0)
+    return <p className="text-center mt-4">No users found</p>;
+
   return (
-    <div className="overflow-x-auto">
-      <table className="table w-full">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Name / Email</th>
-            <th>Trainer</th>
-            <th>Membership</th>
-            <th>Feedback</th> {/* New column */}
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 ? (
-            <tr>
-              <td colSpan="6" className="text-center">
-                No users found
-              </td>
-            </tr>
-          ) : (
-            users.map((user) => {
-              const userId = user.id || user._id;
-              const isEditing = editingId === userId;
-              const isChecked = checkedUsers.includes(userId);
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {users.map((user) => {
+        const userId = user.id || user._id;
+        const isEditing = editingId === userId;
+        const isChecked = checkedUsers.includes(userId);
 
-              return (
-                <tr key={userId}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      className="checkbox"
-                      checked={isChecked}
-                      onChange={() => handleChecked(userId)}
-                    />
-                  </td>
+        return (
+          <div
+            key={userId}
+            className="border rounded-lg p-4 shadow-sm relative hover:shadow-md transition-shadow"
+          >
+            <input
+              type="checkbox"
+              className="absolute top-2 right-2"
+              checked={isChecked}
+              onChange={() => handleChecked(userId)}
+            />
 
-                  <td>
-                    {isEditing ? (
-                      <div className="flex flex-col gap-1">
-                        <input
-                          type="text"
-                          value={editForm.name}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, name: e.target.value })
-                          }
-                          className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-400"
-                        />
-                        <input
-                          type="email"
-                          value={editForm.email}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, email: e.target.value })
-                          }
-                          className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-400"
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="font-bold">{user.name}</div>
-                        <div className="text-sm opacity-50">{user.email}</div>
-                      </div>
-                    )}
-                  </td>
+            {isEditing ? (
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, name: e.target.value })
+                  }
+                  className="border px-2 py-1 rounded focus:ring-1 focus:ring-blue-400"
+                />
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, email: e.target.value })
+                  }
+                  className="border px-2 py-1 rounded focus:ring-1 focus:ring-blue-400"
+                />
+                <textarea
+                  value={editForm.feedback}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, feedback: e.target.value })
+                  }
+                  className="border px-2 py-1 rounded focus:ring-1 focus:ring-blue-400"
+                />
+                <div className="flex gap-2 mt-2">
+                  <button
+                    className="btn btn-xs btn-success"
+                    onClick={() => handleSave(userId)}
+                  >
+                    Save
+                  </button>
+                  <button className="btn btn-xs btn-ghost" onClick={cancelEdit}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <div className="font-bold text-lg">{user.name}</div>
+                <div className="text-sm text-gray-600">{user.email}</div>
 
-                  <td>{user.trainer || "—"}</td>
-                  <td>{user.membership || "None"}</td>
+                {user.membership_type && (
+                  <p className="text-sm">
+                    <span className="font-semibold">Membership:</span>{" "}
+                    {user.membership_type}
+                  </p>
+                )}
+                {user.trainer_name && (
+                  <p className="text-sm">
+                    <span className="font-semibold">Trainer:</span>{" "}
+                    {user.trainer_name}
+                  </p>
+                )}
+                {user.class_name && (
+                  <p className="text-sm">
+                    <span className="font-semibold">Class:</span>{" "}
+                    {user.class_name}
+                  </p>
+                )}
+                {user.booking_date && (
+                  <p className="text-sm italic text-gray-500">
+                    <span className="font-semibold">Booking:</span>{" "}
+                    {new Date(user.booking_date).toLocaleString()}
+                  </p>
+                )}
+                {user.feedback && (
+                  <p className="text-sm italic text-gray-500">
+                    "{user.feedback}"
+                  </p>
+                )}
 
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editForm.feedback}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, feedback: e.target.value })
-                        }
-                        className="border px-2 py-1 rounded text-sm focus:ring-1 focus:ring-blue-400"
-                      />
-                    ) : (
-                      user.feedback || "No feedback"
-                    )}
-                  </td>
-
-                  <td>
-                    {isEditing ? (
-                      <>
-                        <button
-                          className="btn btn-xs btn-success mr-1"
-                          onClick={() => handleSave(userId)}
-                        >
-                          Save
-                        </button>
-                        <button
-                          className="btn btn-xs btn-ghost"
-                          onClick={cancelEdit}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          className="btn btn-xs btn-outline mr-1"
-                          onClick={() => startEdit(user)}
-                        >
-                          Edit
-                        </button>
-                        {isChecked && (
-                          <button
-                            className="btn btn-xs btn-error"
-                            onClick={() => handleDelete(userId)}
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </td>
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    className="btn btn-xs btn-outline"
+                    onClick={() => startEdit(user)}
+                  >
+                    Edit
+                  </button>
+                  {isChecked && (
+                    <button
+                      className="btn btn-xs btn-error"
+                      onClick={() => handleDelete(userId)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

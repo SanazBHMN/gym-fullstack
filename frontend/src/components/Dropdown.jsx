@@ -5,30 +5,34 @@ export const Dropdown = ({
   onJoinedClick,
 }) => {
   return (
-    <details className="dropdown">
-      <summary className="btn m-1">Open or close</summary>
-      <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-        <li>
-          <button className="btn" onClick={onAllClick}>
-            All
-          </button>
-        </li>
-        <li>
-          <button className="btn" onClick={onPgClick}>
-            Postgres
-          </button>
-        </li>
-        <li>
-          <button className="btn" onClick={onMongoClick}>
-            Mongo
-          </button>
-        </li>
-        <li>
-          <button className="btn" onClick={onJoinedClick}>
-            Joined
-          </button>
-        </li>
-      </ul>
-    </details>
+    <div className="mb-6">
+      <label className="block mb-1 font-semibold">Select User Source</label>
+      <select
+        className="select select-bordered w-full max-w-xs"
+        onChange={(e) => {
+          switch (e.target.value) {
+            case "all":
+              onAllClick();
+              break;
+            case "postgres":
+              onPgClick();
+              break;
+            case "mongo":
+              onMongoClick();
+              break;
+            case "joined":
+              onJoinedClick();
+              break;
+            default:
+              break;
+          }
+        }}
+      >
+        <option value="all">All Users</option>
+        <option value="postgres">Postgres Users</option>
+        <option value="mongo">Mongo Users</option>
+        <option value="joined">Joined Users</option>
+      </select>
+    </div>
   );
 };
