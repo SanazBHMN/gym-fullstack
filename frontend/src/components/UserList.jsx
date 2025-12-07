@@ -62,20 +62,21 @@ export const UserList = ({ users, onUpdate }) => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="table">
+      <table className="table w-full">
         <thead>
           <tr>
             <th></th>
             <th>Name / Email</th>
             <th>Trainer</th>
             <th>Membership</th>
+            <th>Feedback</th> {/* New column */}
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {users.length === 0 ? (
             <tr>
-              <td colSpan="5" className="text-center">
+              <td colSpan="6" className="text-center">
                 No users found
               </td>
             </tr>
@@ -124,14 +125,29 @@ export const UserList = ({ users, onUpdate }) => {
                     )}
                   </td>
 
-                  <td>Shaghayegh</td>
-                  <td>{user.membership}</td>
+                  <td>{user.trainer || "—"}</td>
+                  <td>{user.membership || "None"}</td>
+
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm.feedback}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, feedback: e.target.value })
+                        }
+                        className="border px-2 py-1 rounded text-sm focus:ring-1 focus:ring-blue-400"
+                      />
+                    ) : (
+                      user.feedback || "No feedback"
+                    )}
+                  </td>
 
                   <td>
                     {isEditing ? (
                       <>
                         <button
-                          className="btn btn-xs btn-success"
+                          className="btn btn-xs btn-success mr-1"
                           onClick={() => handleSave(userId)}
                         >
                           Save
@@ -146,7 +162,7 @@ export const UserList = ({ users, onUpdate }) => {
                     ) : (
                       <>
                         <button
-                          className="btn btn-xs btn-outline"
+                          className="btn btn-xs btn-outline mr-1"
                           onClick={() => startEdit(user)}
                         >
                           Edit

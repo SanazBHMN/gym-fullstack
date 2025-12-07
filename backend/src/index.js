@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const pool = require("../db/postgres");
 const { PrismaClient } = require("../generated/prisma");
 const { MongoClient, ObjectId } = require("mongodb");
 
@@ -61,7 +62,10 @@ app.get("/api/users", async (req, res) => {
     res.json(allUsers);
   } catch (error) {
     console.log("ERROR FETCHING USERS", error);
-    res.status(500).json({ error: "FAILED TO FETCH USERS FROM BOTH DBs" });
+    res.status(500).json({
+      error: "FAILED TO FETCH USERS FROM BOTH DBs",
+      details: error.message,
+    });
   }
 });
 
@@ -87,27 +91,40 @@ app.get("/api/postgres-users", async (req, res) => {
 
 app.get("/api/joined-users", async (req, res) => {
   try {
-    const pgUsers = await prisma.user.findMany({
+    // 1️⃣ Fetch users from PostgreSQL
+    const sqlUsers = await prisma.user.findMany({
       include: { membership: true },
     });
-    const feedbackDocs = await mongoDb.collection("feedback").find().toArray();
 
-    const joinedUsers = pgUsers.map((pgUser) => {
-      const feedback = feedbackDocs.find((fb) => fb.userEmail === pgUser.email);
+    // 2️⃣ Fetch users from MongoDB
+    const mongoUsers = await mongoDb.collection("users").find().toArray();
 
-      return {
-        name: pgUser.name,
-        email: pgUser.email,
-        membership: pgUser.membership?.type || "None",
-        feedback: feedback?.message || "No feedback",
-        rating: feedback?.rating || null,
-      };
-    });
+    // 3️⃣ Normalize and combine both
+    const combinedUsers = [
+      ...sqlUsers.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        membership: u.membership ? u.membership.type : "None",
+        feedback: "No feedback", // Postgres users have no feedback field
+      })),
+      ...mongoUsers.map((u) => ({
+        id: u._id,
+        name: u.name,
+        email: u.email,
+        membership: u.membershipType || "None",
+        feedback: u.feedback || "No feedback",
+      })),
+    ];
 
-    res.json(joinedUsers);
+    // 4️⃣ Send combined response
+    res.json(combinedUsers);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "JOIN FAILED" });
+    console.error(error);
+    res.status(500).json({
+      message: "FAILED TO FETCH USERS FROM BOTH DBs",
+      details: error.message,
+    });
   }
 });
 
