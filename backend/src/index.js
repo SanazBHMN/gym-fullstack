@@ -91,22 +91,19 @@ app.get("/api/postgres-users", async (req, res) => {
 
 app.get("/api/joined-users", async (req, res) => {
   try {
-    // 1️⃣ Fetch users from PostgreSQL
     const sqlUsers = await prisma.user.findMany({
       include: { membership: true },
     });
 
-    // 2️⃣ Fetch users from MongoDB
     const mongoUsers = await mongoDb.collection("users").find().toArray();
 
-    // 3️⃣ Normalize and combine both
     const combinedUsers = [
       ...sqlUsers.map((u) => ({
         id: u.id,
         name: u.name,
         email: u.email,
         membership: u.membership ? u.membership.type : "None",
-        feedback: "No feedback", // Postgres users have no feedback field
+        feedback: "No feedback",
       })),
       ...mongoUsers.map((u) => ({
         id: u._id,
@@ -117,7 +114,6 @@ app.get("/api/joined-users", async (req, res) => {
       })),
     ];
 
-    // 4️⃣ Send combined response
     res.json(combinedUsers);
   } catch (error) {
     console.error(error);
