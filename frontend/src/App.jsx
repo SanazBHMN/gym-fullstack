@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import "./App.css";
 import { UserList } from "./components/UserList";
 import { AddUserForm } from "./components/AddUserForm";
 import { Dropdown } from "./components/Dropdown";
-import "./App.css";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch all users by default
   const fetchUsers = () => {
     setLoading(true);
     fetch("http://localhost:5000/api/users")
@@ -17,59 +18,53 @@ function App() {
         setLoading(false);
       })
       .catch((err) => {
-        setError("FAILED TO FETCH USERS");
+        console.error(err);
         setLoading(false);
       });
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const fetchPostgresUsers = () => {
     fetch("http://localhost:5000/api/postgres-users")
       .then((res) => res.json())
-      .then((data) => {
-        setUsers(data);
-      })
-      .catch((error) => console.log("FAILED TO FETCH USERS FROM POSTGRES"));
+      .then((data) => setUsers(data))
+      .catch((err) => console.error(err));
   };
 
   const fetchMongoUsers = () => {
     fetch("http://localhost:5000/api/mongo-users")
       .then((res) => res.json())
       .then((data) => setUsers(data))
-      .catch((err) => console.error("FAILED TO FETCH USERS FROM MONGO"));
+      .catch((err) => console.error(err));
   };
 
   const fetchJoinedUsers = () => {
     fetch("http://localhost:5000/api/joined-users")
       .then((res) => res.json())
-      .then((data) => {
-        setUsers(data);
-      })
-      .catch((error) => console.error("FAILED TO FETCH JOINED USERS", error));
+      .then((data) => setUsers(data))
+      .catch((err) => console.error(err));
   };
 
-  if (loading) return <p>LOADING USERS...</p>;
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  if (loading) return <p className="text-center mt-20">Loading users...</p>;
 
   return (
-    <div className="w-full">
-      <main className="w-11/12 md:w-9/12 mx-auto my-15">
-        <div className="flex justify-between mb-3">
-          <Dropdown
-            onAllClick={fetchUsers}
-            onPgClick={fetchPostgresUsers}
-            onMongoClick={fetchMongoUsers}
-            onJoinedClick={fetchJoinedUsers}
-          />
-          <AddUserForm onSuccess={fetchUsers} />
-        </div>
-        {loading ? (
-          <p>Loading users...</p>
-        ) : (
-          <UserList users={users} onUpdate={fetchUsers} />
-        )}
+    <div className="flex min-h-screen bg-gray-100">
+      <aside className="w-64 bg-white shadow-md p-4">
+        <h2 className="text-xl font-bold mb-6">🏋️ Gym Dashboard</h2>
+        <Dropdown
+          onAllClick={fetchUsers}
+          onPgClick={fetchPostgresUsers}
+          onMongoClick={fetchMongoUsers}
+          onJoinedClick={fetchJoinedUsers}
+        />
+      </aside>
+
+      <main className="flex-1 p-6">
+        <AddUserForm onSuccess={fetchUsers} />
+        <UserList users={users} onUpdate={fetchUsers} />
       </main>
     </div>
   );
